@@ -8,7 +8,14 @@
             "type": "java",
             "name": "HmsApplication",
             "request": "launch",
-            "mainClass": "spring.src.main.java.com.example.hms.HmsApplication",
+            "mainClass": "com.example.hms.HmsApplication",
+            "projectName": "spring"
+        },
+        {
+            "type": "java",
+            "name": "HmsApplication",
+            "request": "launch",
+            "mainClass": "com.example.hms.HmsApplication",
             "projectName": "CRT_Phase_2_516efd76"
         },
         {
