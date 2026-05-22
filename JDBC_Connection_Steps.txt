@@ -1,0 +1,13 @@
+Steps to connect JDBC with MySQL/Postgres:
+
+1) Install Jar File from the MySQL DB Connector
+2) Add the Jar File into the Class Path (VS Code of the Env. Variables)
+3) Create a .java file for the connection of java code with the mysql through JDBC
+   a) import the sql package
+   b) Add & Register the DriverManager
+   c) Now Establish the Connection (Connection conn = DriverManager.getConnection(url,username,password))
+   d) Create the Statement (to pass the query to send the SQL commands)
+   e) Create the ResultSet (to store the data)
+
+4) Add JDBC Connection using Connection (filename.getConnection())
+5) Compile & Execute the main java file

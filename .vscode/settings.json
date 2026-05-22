@@ -1,0 +1,11 @@
+{
+    "java.project.sourcePaths": [
+        "OOPS/CaseStudy/HospitalManagementSystem",
+        "OOPS",
+        "demo/src/main/java/com/example/demo"
+    ],
+    "java.project.referencedLibraries": [
+        "OOPS/CaseStudy/HospitalManagementSystem/lib/mysql-connector-j-9.7.0.jar"
+    ],
+    "java.debug.settings.onBuildFailureProceed": true
+}

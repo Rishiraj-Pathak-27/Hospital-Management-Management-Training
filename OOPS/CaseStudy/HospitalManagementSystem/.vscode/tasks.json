@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Compile JavaFX",
+      "type": "shell",
+      "command": "/home/rishiraj/.jdk/jdk-25/bin/javac",
+      "args": [
+        "--module-path",
+        "/home/rishiraj/Downloads/javafx-26_linux-x64_bin-sdk/javafx-sdk-26.0.1/lib",
+        "--add-modules",
+        "javafx.controls",
+        "-cp",
+        "lib/mysql-connector-j-9.7.0.jar",
+        "Main.java",
+        "HMS.java",
+        "JDBConn.java"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "Run JavaFX",
+      "type": "shell",
+      "command": "/home/rishiraj/.jdk/jdk-25/bin/java",
+      "args": [
+        "--module-path",
+        "/home/rishiraj/Downloads/javafx-26_linux-x64_bin-sdk/javafx-sdk-26.0.1/lib",
+        "--add-modules",
+        "javafx.controls",
+        "-cp",
+        ".:lib/mysql-connector-j-9.7.0.jar",
+        "Main"
+      ],
+      "dependsOn": ["Compile JavaFX"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always"
+      }
+    }
+  ]
+}

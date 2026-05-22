@@ -1,0 +1,35 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "HmsApplication",
+            "request": "launch",
+            "mainClass": "spring.src.main.java.com.example.hms.HmsApplication",
+            "projectName": "CRT_Phase_2_516efd76"
+        },
+        {
+            "type": "java",
+            "name": "HMS",
+            "request": "launch",
+            "mainClass": "HMS",
+            "projectName": "CRT_Phase_2_516efd76"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "CRT_Phase_2_516efd76"
+        },
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        }
+    ]
+}

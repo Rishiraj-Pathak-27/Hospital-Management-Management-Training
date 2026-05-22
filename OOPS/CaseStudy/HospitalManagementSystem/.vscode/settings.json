@@ -1,0 +1,9 @@
+{
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.project.sourcePaths": [
+        "spring/src/main/java"
+    ],
+    "java.project.referencedLibraries": [
+        "/home/rishiraj/Downloads/javafx-26_linux-x64_bin-sdk/javafx-sdk-26.0.1/lib/*.jar"
+    ]
+}

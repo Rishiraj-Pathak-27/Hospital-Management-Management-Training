@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "JavaFX",
+            "request": "launch",
+            "mainClass": "Main",
+            "vmArgs": "--module-path \"/home/rishiraj/Downloads/javafx-26_linux-x64_bin-sdk/javafx-sdk-26.0.1/lib\" --add-modules javafx.controls,javafx.fxml"
+        }
+    ]
+}
