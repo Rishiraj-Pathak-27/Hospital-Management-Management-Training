@@ -1,0 +1,18 @@
+Dependency Injection Deep Level Questions
+
+1) How does @AutoWired works internally
+2) How does Auto Configuration words internally
+3) what is the diff between PUT and PATCH in Rest API?
+4) What is the diff between authentication and authorization
+5) why jwt in microservices
+6) why microservices fail in real companies
+7) what is the difference between and monolith and distributed monolith?
+8) why api gateway?
+9) what is the circuit breaker
+10) how do you debug high CPU in spring boot?
+11) how do you secure secrets
+
+HIDDEN SCENARIO BASED QUESTIONS
+
+1) why is your application is slow during deployment but fast locally
+2) 

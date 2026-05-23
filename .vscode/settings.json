@@ -1,10 +1,12 @@
 {
     "java.project.sourcePaths": [
-        "OOPS/CaseStudy/HospitalManagementSystem/spring/src/main/java",
-        "OOPS/CaseStudy/HospitalManagementSystem"
+        "OOPS/CaseStudy/HospitalManagementSystem",
+        "OOPS/CaseStudy/HospitalManagementSystem/spring/src/main/java"
     ],
     "java.project.referencedLibraries": [
-        "OOPS/CaseStudy/HospitalManagementSystem/lib/mysql-connector-j-9.7.0.jar"
+        "OOPS/CaseStudy/HospitalManagementSystem/lib/mysql-connector-j-9.7.0.jar",
+        "/media/rishiraj/New Volume/CRT_Phase_2/OOPS/CaseStudy/HospitalManagementSystem/lib/mysql-connector-j-9.7.0.jar"
     ],
-    "java.debug.settings.onBuildFailureProceed": true
+    "java.debug.settings.onBuildFailureProceed": true,
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

@@ -257,7 +257,7 @@ class Hospital {
         String disease = sc.nextLine();
 
         String sql =
-                "insert into patients values(?,?,?,?)";
+                "insert into patients (patientId, name, age, disease) values(?,?,?,?)";
 
         PreparedStatement ps =
                 conn.prepareStatement(sql);
@@ -312,7 +312,7 @@ class Hospital {
         String specialization = sc.nextLine();
 
         String sql =
-                "insert into doctors values(?,?,?)";
+                "insert into doctors (doctorId, name, specialization) values(?,?,?)";
 
         PreparedStatement ps =
                 conn.prepareStatement(sql);
@@ -368,7 +368,7 @@ class Hospital {
         String date = sc.nextLine();
 
         String sql =
-                "insert into appointments values(?,?,?,?)";
+                "insert into appointments (appointmentId, patientId, doctorId, date) values(?,?,?,?)";
 
         PreparedStatement ps =
                 conn.prepareStatement(sql);
