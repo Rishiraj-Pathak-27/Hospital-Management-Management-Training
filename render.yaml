@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: hospital-demo
+    env: docker
+    plan: free
+    dockerfilePath: OOPS/CaseStudy/HospitalManagementSystem/demo/Dockerfile
+    healthCheckPath: /healthz
+    envVars:
+      - key: SPRING_SQL_INIT_MODE
+        value: 'never'
+      - key: HIKARI_INIT_FAIL_TIMEOUT
+        value: '-1'
+      - key: SERVER_ADDRESS
+        value: '0.0.0.0'
