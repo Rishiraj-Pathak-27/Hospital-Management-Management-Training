@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS appointments (
     appointmentId INT PRIMARY KEY,
     patientId INT NOT NULL,
     doctorId INT NOT NULL,
-    `date` VARCHAR(50) NOT NULL,
+    "date" VARCHAR(50) NOT NULL,
     CONSTRAINT fk_appointments_patient
         FOREIGN KEY (patientId) REFERENCES patients(patientId)
         ON DELETE CASCADE ON UPDATE CASCADE,
