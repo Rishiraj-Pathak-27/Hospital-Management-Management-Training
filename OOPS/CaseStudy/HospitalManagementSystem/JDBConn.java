@@ -14,9 +14,12 @@ public class JDBConn {
 
     static Connection getConnection() throws SQLException {
 
-        String url = "jdbc:mysql://localhost:3306/hmsdb";
-        String username = "root";
-        String password = "Root@1234";
+        String url = System.getenv().getOrDefault(
+                "DATABASE_URL",
+                "jdbc:mysql://localhost:3306/hmsdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+        );
+        String username = System.getenv().getOrDefault("DATABASE_USER", "root");
+        String password = System.getenv().getOrDefault("DATABASE_PASSWORD", "Root@1234");
 
         return DriverManager.getConnection(url,username,password);
     }
