@@ -16,7 +16,7 @@ public class JDBConn {
 
         String url = System.getenv().getOrDefault(
                 "DATABASE_URL",
-                "jdbc:mysql://localhost:3306/hmsdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+                "jdbc:mysql://localhost:3306/hmsdb"
         );
         String username = System.getenv().getOrDefault("DATABASE_USER", "root");
         String password = System.getenv().getOrDefault("DATABASE_PASSWORD", "Root@1234");

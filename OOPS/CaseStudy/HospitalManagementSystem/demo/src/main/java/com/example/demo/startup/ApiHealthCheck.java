@@ -19,11 +19,12 @@ public class ApiHealthCheck implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        String port = System.getenv().getOrDefault("PORT", "8080");
         logger.info("========================================");
         logger.info("Hospital Management System API Health Check");
         logger.info("========================================");
         logger.info("API Status: ✓ RUNNING");
-        logger.info("Base URL: http://localhost:8080/api/hospital");
+        logger.info("Base URL: http://localhost:" + port + "/api/hospital");
         logger.info("");
         logger.info("Available Endpoints:");
         logger.info("  1. GET /hello - Health check endpoint");
