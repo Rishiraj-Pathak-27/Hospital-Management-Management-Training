@@ -229,7 +229,7 @@ class Appointment {
 class Hospital {
 
     Connection conn;
-    Scanner sc = new Scanner(System.in);
+    Scanner sc = nit ew Scanner(System.in);
 
     Hospital() throws SQLException {
 

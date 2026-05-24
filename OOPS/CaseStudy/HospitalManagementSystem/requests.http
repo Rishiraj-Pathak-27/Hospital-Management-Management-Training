@@ -1,0 +1,16 @@
+@baseUrl = http://localhost:8080/api/hospital
+
+### Health Check
+GET {{baseUrl}}/hello
+
+### Get All Counts
+GET {{baseUrl}}/counts
+
+### Get Patients Count
+GET {{baseUrl}}/counts/patients
+
+### Get Doctors Count
+GET {{baseUrl}}/counts/doctors
+
+### Get Appointments Count
+GET {{baseUrl}}/counts/appointments
