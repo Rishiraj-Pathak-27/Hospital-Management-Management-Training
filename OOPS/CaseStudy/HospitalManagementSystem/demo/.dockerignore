@@ -1,0 +1,13 @@
+target/
+.git/
+.gitignore
+.vscode/
+.mvn/
+mvnw.cmd
+*.md
+.class
+.jar
+.war
+.ear
+*.log
+node_modules/
