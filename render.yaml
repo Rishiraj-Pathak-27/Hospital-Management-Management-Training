@@ -3,7 +3,8 @@ services:
     name: hospital-demo
     env: docker
     plan: free
-    dockerfilePath: OOPS/CaseStudy/HospitalManagementSystem/demo/Dockerfile
+    rootDir: OOPS/CaseStudy/HospitalManagementSystem/demo
+    dockerfilePath: Dockerfile
     healthCheckPath: /healthz
     envVars:
       - key: SPRING_SQL_INIT_MODE
