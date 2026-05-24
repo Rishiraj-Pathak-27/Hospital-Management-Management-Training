@@ -5,6 +5,7 @@ services:
     plan: free
     buildCommand: ''
     dockerfilePath: Dockerfile
+    healthCheckPath: /healthz
     envVars:
       - key: SPRING_SQL_INIT_MODE
         value: 'never'
