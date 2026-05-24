@@ -18,6 +18,16 @@ public class HospitalController {
         this.hospitalService = hospitalService;
     }
 
+    @GetMapping({"", "/"})
+    public Map<String, String> home() {
+        return Map.of(
+                "service", "Hospital Management System API",
+                "status", "running",
+                "healthEndpoint", "/api/hospital/hello",
+                "countsEndpoint", "/api/hospital/counts"
+        );
+    }
+
     @GetMapping("/hello")
     public Map<String, String> hello() {
         return Map.of("message", "Hospital Management System API is running");
