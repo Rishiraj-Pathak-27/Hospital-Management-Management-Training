@@ -4,7 +4,6 @@ services:
     env: docker
     plan: free
     buildCommand: ''
-    startCommand: 'java -jar /app/app.jar'
     dockerfilePath: Dockerfile
     envVars:
       - key: SPRING_SQL_INIT_MODE
@@ -13,5 +12,3 @@ services:
         value: '-1'
       - key: SERVER_ADDRESS
         value: '0.0.0.0'
-      - key: PORT
-        value: '10000'

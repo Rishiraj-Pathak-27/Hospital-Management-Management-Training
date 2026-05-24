@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.HospitalCountsResponse;
+import com.example.demo.dto.HospitalStatusResponse;
 import com.example.demo.service.HospitalService;
 import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,9 +29,32 @@ public class HospitalController {
         );
     }
 
+    @GetMapping("/health")
+    public Map<String, String> health() {
+        return Map.of(
+                "service", "Hospital Management System API",
+                "status", "running"
+        );
+    }
+
     @GetMapping("/hello")
     public Map<String, String> hello() {
         return Map.of("message", "Hospital Management System API is running");
+    }
+
+    @GetMapping("/status")
+    public HospitalStatusResponse status() {
+        HospitalCountsResponse counts = hospitalService.getAllCounts();
+        return new HospitalStatusResponse(
+                "Hospital Management System API",
+                "running",
+                "/api/hospital/health",
+                "/api/hospital/counts",
+                counts.patients(),
+                counts.doctors(),
+                counts.appointments(),
+                counts.totalRecords()
+        );
     }
 
     @GetMapping("/counts")
