@@ -148,7 +148,13 @@
 //     }
 // }
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.Locale;
 import java.util.Scanner;
 
 class Patient {
@@ -203,12 +209,7 @@ class Appointment {
     Doctor doctor;
     String date;
 
-    Appointment(
-            int appointmentId,
-            Patient patient,
-            Doctor doctor,
-            String date
-    ) {
+    Appointment(int appointmentId, Patient patient, Doctor doctor, String date) {
 
         this.appointmentId = appointmentId;
         this.patient = patient;
@@ -226,212 +227,543 @@ class Appointment {
     }
 }
 
-class Hospital {
+class BedAllocation {
 
-    Connection conn;
-    Scanner sc = nit ew Scanner(System.in);
+    int wardId;
+    String wardName;
+    String wardType;
+    int bedId;
+    String bedNumber;
+
+    BedAllocation(int wardId, String wardName, String wardType, int bedId, String bedNumber) {
+
+        this.wardId = wardId;
+        this.wardName = wardName;
+        this.wardType = wardType;
+        this.bedId = bedId;
+        this.bedNumber = bedNumber;
+    }
+}
+
+class Hospital implements AutoCloseable {
+
+    private static final String STATUS_CONSULT_ONLY = "CONSULT_ONLY";
+    private static final String STATUS_ADMITTED = "ADMITTED";
+
+    private final Connection conn;
+    private final Scanner sc = new Scanner(System.in);
 
     Hospital() throws SQLException {
 
         conn = JDBConn.getConnection();
-
-        System.out.println("Database Connected");
+        seedDefaultWardData();
+        System.out.println("Database connected");
     }
 
-    // patient function
+    void run() throws SQLException {
+
+        boolean running = true;
+
+        while (running) {
+            System.out.println();
+            System.out.println("1. Add Patient");
+            System.out.println("2. View Patients");
+            System.out.println("3. Add Doctor");
+            System.out.println("4. View Doctors");
+            System.out.println("5. Book Appointment");
+            System.out.println("6. View Appointments");
+            System.out.println("7. Admit Patient");
+            System.out.println("8. View Wards");
+            System.out.println("9. View Beds");
+            System.out.println("10. View Admissions");
+            System.out.println("0. Exit");
+
+            int choice = readInt("Choose an option");
+
+            switch (choice) {
+                case 1 -> addPatient();
+                case 2 -> viewPatients();
+                case 3 -> addDoctor();
+                case 4 -> viewDoctors();
+                case 5 -> bookAppointment();
+                case 6 -> viewAppointments();
+                case 7 -> admitPatient();
+                case 8 -> viewWards();
+                case 9 -> viewBeds();
+                case 10 -> viewAdmissions();
+                case 0 -> running = false;
+                default -> System.out.println("Invalid option");
+            }
+        }
+    }
 
     void addPatient() throws SQLException {
 
-        System.out.println("Enter Patient Id");
-        int id = sc.nextInt();
-        sc.nextLine();
+        int id = readInt("Enter Patient Id");
+        String name = readText("Enter Name");
+        int age = readInt("Enter Age");
+        String disease = readText("Enter Disease");
 
-        System.out.println("Enter Name");
-        String name = sc.nextLine();
+        String sql = "insert into patients (patientId, name, age, disease) values (?, ?, ?, ?)";
 
-        System.out.println("Enter Age");
-        int age = sc.nextInt();
-        sc.nextLine();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.setString(2, name);
+            ps.setInt(3, age);
+            ps.setString(4, disease);
+            ps.executeUpdate();
+        }
 
-        System.out.println("Enter Disease");
-        String disease = sc.nextLine();
-
-        String sql =
-                "insert into patients (patientId, name, age, disease) values(?,?,?,?)";
-
-        PreparedStatement ps =
-                conn.prepareStatement(sql);
-
-        ps.setInt(1, id);
-        ps.setString(2, name);
-        ps.setInt(3, age);
-        ps.setString(4, disease);
-
-        ps.executeUpdate();
-
-        System.out.println("Patient Added");
+        System.out.println("Patient added");
     }
 
     void viewPatients() throws SQLException {
 
-        String sql = "select * from patients";
+        String sql = "select * from patients order by patientId";
 
-        Statement st =
-                conn.createStatement();
-
-        ResultSet rs =
-                st.executeQuery(sql);
-
-        while (rs.next()) {
-
-            Patient p = new Patient(
-                    rs.getInt("patientId"),
-                    rs.getString("name"),
-                    rs.getInt("age"),
-                    rs.getString("disease")
-            );
-
-            p.displayPatient();
-
-            System.out.println();
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                Patient p = new Patient(
+                        rs.getInt("patientId"),
+                        rs.getString("name"),
+                        rs.getInt("age"),
+                        rs.getString("disease")
+                );
+                p.displayPatient();
+                System.out.println();
+            }
         }
     }
 
-    // doctor function
-
     void addDoctor() throws SQLException {
 
-        System.out.println("Enter Doctor Id");
-        int id = sc.nextInt();
-        sc.nextLine();
+        int id = readInt("Enter Doctor Id");
+        String name = readText("Enter Name");
+        String specialization = readText("Enter Specialization");
 
-        System.out.println("Enter Name");
-        String name = sc.nextLine();
+        String sql = "insert into doctors (doctorId, name, specialization) values (?, ?, ?)";
 
-        System.out.println("Enter Specialization");
-        String specialization = sc.nextLine();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.setString(2, name);
+            ps.setString(3, specialization);
+            ps.executeUpdate();
+        }
 
-        String sql =
-                "insert into doctors (doctorId, name, specialization) values(?,?,?)";
-
-        PreparedStatement ps =
-                conn.prepareStatement(sql);
-
-        ps.setInt(1, id);
-        ps.setString(2, name);
-        ps.setString(3, specialization);
-
-        ps.executeUpdate();
-
-        System.out.println("Doctor Added");
+        System.out.println("Doctor added");
     }
 
     void viewDoctors() throws SQLException {
 
-        String sql = "select * from doctors";
+        String sql = "select * from doctors order by doctorId";
 
-        Statement st =
-                conn.createStatement();
-
-        ResultSet rs =
-                st.executeQuery(sql);
-
-        while (rs.next()) {
-
-            Doctor d = new Doctor(
-                    rs.getInt("doctorId"),
-                    rs.getString("name"),
-                    rs.getString("specialization")
-            );
-
-            d.displayDoctor();
-
-            System.out.println();
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                Doctor d = new Doctor(
+                        rs.getInt("doctorId"),
+                        rs.getString("name"),
+                        rs.getString("specialization")
+                );
+                d.displayDoctor();
+                System.out.println();
+            }
         }
     }
 
-    // appointment function
-
     void bookAppointment() throws SQLException {
 
-        System.out.println("Enter Appointment Id");
-        int aid = sc.nextInt();
+        int aid = readInt("Enter Appointment Id");
+        int pid = readInt("Enter Patient Id");
+        int did = readInt("Enter Doctor Id");
+        String date = readText("Enter Date (for example 2026-05-26)");
 
-        System.out.println("Enter Patient Id");
-        int pid = sc.nextInt();
+        String sql = "insert into appointments (appointmentId, patientId, doctorId, appointment_date) values (?, ?, ?, ?)";
 
-        System.out.println("Enter Doctor Id");
-        int did = sc.nextInt();
-        sc.nextLine();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, aid);
+            ps.setInt(2, pid);
+            ps.setInt(3, did);
+            ps.setString(4, date);
+            ps.executeUpdate();
+        }
 
-        System.out.println("Enter Date");
-        String date = sc.nextLine();
-
-        String sql =
-                "insert into appointments (appointmentId, patientId, doctorId, date) values(?,?,?,?)";
-
-        PreparedStatement ps =
-                conn.prepareStatement(sql);
-
-        ps.setInt(1, aid);
-        ps.setInt(2, pid);
-        ps.setInt(3, did);
-        ps.setString(4, date);
-
-        ps.executeUpdate();
-
-        System.out.println("Appointment Booked");
+        System.out.println("Appointment booked");
     }
 
     void viewAppointments() throws SQLException {
 
         String sql =
-                "select a.appointmentId,a.date," +
-                "p.patientId,p.name,p.age,p.disease," +
-                "d.doctorId,d.name as doctorName,d.specialization " +
+                "select a.appointmentId, a.appointment_date, " +
+                "p.patientId, p.name as patientName, p.age, p.disease, " +
+                "d.doctorId, d.name as doctorName, d.specialization " +
                 "from appointments a " +
                 "join patients p on a.patientId = p.patientId " +
-                "join doctors d on a.doctorId = d.doctorId";
+                "join doctors d on a.doctorId = d.doctorId " +
+                "order by a.appointmentId";
 
-        Statement st =
-                conn.createStatement();
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                Patient p = new Patient(
+                        rs.getInt("patientId"),
+                        rs.getString("patientName"),
+                        rs.getInt("age"),
+                        rs.getString("disease")
+                );
 
-        ResultSet rs =
-                st.executeQuery(sql);
+                Doctor d = new Doctor(
+                        rs.getInt("doctorId"),
+                        rs.getString("doctorName"),
+                        rs.getString("specialization")
+                );
 
-        while (rs.next()) {
+                Appointment a = new Appointment(
+                        rs.getInt("appointmentId"),
+                        p,
+                        d,
+                        rs.getString("appointment_date")
+                );
 
-            Patient p = new Patient(
-                    rs.getInt("patientId"),
-                    rs.getString("name"),
-                    rs.getInt("age"),
-                    rs.getString("disease")
-            );
-
-            Doctor d = new Doctor(
-                    rs.getInt("doctorId"),
-                    rs.getString("doctorName"),
-                    rs.getString("specialization")
-            );
-
-            Appointment a = new Appointment(
-                    rs.getInt("appointmentId"),
-                    p,
-                    d,
-                    rs.getString("date")
-            );
-
-            a.displayAppointment();
-
-            System.out.println();
+                a.displayAppointment();
+                System.out.println();
+            }
         }
     }
 
-    void closeConnection() throws SQLException {
+    void admitPatient() throws SQLException {
 
+        int patientId = readInt("Enter Patient Id");
+        String severity = normalizeSeverity(readText("Enter Severity (low, medium, high, critical)"));
+        String notes = readText("Enter Notes");
+
+        Patient patient = getPatientById(patientId);
+
+        if (patient == null) {
+            System.out.println("Patient not found");
+            return;
+        }
+
+        if (isConsultOnlySeverity(severity)) {
+            recordAdmission(patientId, severity, STATUS_CONSULT_ONLY, null, null, notes);
+            System.out.println("Low severity found. Consultation only. No bed allocation needed.");
+            return;
+        }
+
+        BedAllocation allocation = findAvailableBed(severity);
+
+        if (allocation == null) {
+            System.out.println("No available ward/bed found for this severity");
+            return;
+        }
+
+        conn.setAutoCommit(false);
+
+        try {
+            markBedUnavailable(allocation.bedId);
+            recordAdmission(patientId, severity, STATUS_ADMITTED, allocation.wardId, allocation.bedId, notes);
+            conn.commit();
+
+            System.out.println("Patient admitted");
+            System.out.println("Ward : " + allocation.wardName + " (" + allocation.wardType + ")");
+            System.out.println("Bed : " + allocation.bedNumber);
+        } catch (SQLException ex) {
+            conn.rollback();
+            throw ex;
+        } finally {
+            conn.setAutoCommit(true);
+        }
+    }
+
+    void viewWards() throws SQLException {
+
+        String sql = "select wardId, wardName, wardType, severityRank, totalBeds from wards order by severityRank, wardId";
+
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                System.out.println("Ward Id : " + rs.getInt("wardId"));
+                System.out.println("Ward Name : " + rs.getString("wardName"));
+                System.out.println("Ward Type : " + rs.getString("wardType"));
+                System.out.println("Severity Rank : " + rs.getInt("severityRank"));
+                System.out.println("Total Beds : " + rs.getInt("totalBeds"));
+                System.out.println();
+            }
+        }
+    }
+
+    void viewBeds() throws SQLException {
+
+        String sql =
+                "select b.bedId, b.bedNumber, b.isAvailable, " +
+                "w.wardId, w.wardName, w.wardType " +
+                "from beds b " +
+                "join wards w on b.wardId = w.wardId " +
+                "order by w.severityRank, b.bedId";
+
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                System.out.println("Bed Id : " + rs.getInt("bedId"));
+                System.out.println("Bed Number : " + rs.getString("bedNumber"));
+                System.out.println("Ward : " + rs.getString("wardName") + " (" + rs.getString("wardType") + ")");
+                System.out.println("Available : " + rs.getBoolean("isAvailable"));
+                System.out.println();
+            }
+        }
+    }
+
+    void viewAdmissions() throws SQLException {
+
+        String sql =
+                "select a.admissionId, a.admissionDate, a.severity, a.admissionStatus, a.notes, " +
+                "p.patientId, p.name as patientName, p.age, p.disease, " +
+                "w.wardName, w.wardType, b.bedNumber " +
+                "from admissions a " +
+                "join patients p on a.patientId = p.patientId " +
+                "left join wards w on a.wardId = w.wardId " +
+                "left join beds b on a.bedId = b.bedId " +
+                "order by a.admissionId desc";
+
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                System.out.println("Admission Id : " + rs.getInt("admissionId"));
+                System.out.println("Admission Date : " + rs.getString("admissionDate"));
+                System.out.println("Severity : " + rs.getString("severity"));
+                System.out.println("Status : " + rs.getString("admissionStatus"));
+                System.out.println("Patient Id : " + rs.getInt("patientId"));
+                System.out.println("Patient Name : " + rs.getString("patientName"));
+                System.out.println("Age : " + rs.getInt("age"));
+                System.out.println("Disease : " + rs.getString("disease"));
+                System.out.println("Ward : " + valueOrDefault(rs.getString("wardName"), "N/A"));
+                System.out.println("Bed : " + valueOrDefault(rs.getString("bedNumber"), "N/A"));
+                System.out.println("Notes : " + valueOrDefault(rs.getString("notes"), ""));
+                System.out.println();
+            }
+        }
+    }
+
+    private Patient getPatientById(int patientId) throws SQLException {
+
+        String sql = "select * from patients where patientId = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, patientId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+
+                return new Patient(
+                        rs.getInt("patientId"),
+                        rs.getString("name"),
+                        rs.getInt("age"),
+                        rs.getString("disease")
+                );
+            }
+        }
+    }
+
+    private BedAllocation findAvailableBed(String severity) throws SQLException {
+
+        String wardType = resolveWardType(severity);
+        String sql =
+                "select b.bedId, b.bedNumber, w.wardId, w.wardName, w.wardType " +
+                "from beds b " +
+                "join wards w on b.wardId = w.wardId " +
+                "where b.isAvailable = true and lower(w.wardType) = ? " +
+                "order by b.bedId " +
+                "limit 1 for update";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, wardType.toLowerCase(Locale.ROOT));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+
+                return new BedAllocation(
+                        rs.getInt("wardId"),
+                        rs.getString("wardName"),
+                        rs.getString("wardType"),
+                        rs.getInt("bedId"),
+                        rs.getString("bedNumber")
+                );
+            }
+        }
+    }
+
+    private void markBedUnavailable(int bedId) throws SQLException {
+
+        String sql = "update beds set isAvailable = false where bedId = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, bedId);
+            ps.executeUpdate();
+        }
+    }
+
+    private void recordAdmission(
+            int patientId,
+            String severity,
+            String status,
+            Integer wardId,
+            Integer bedId,
+            String notes
+    ) throws SQLException {
+
+        String sql =
+                "insert into admissions " +
+                "(patientId, severity, admissionStatus, wardId, bedId, admissionDate, notes) " +
+                "values (?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, patientId);
+            ps.setString(2, severity);
+            ps.setString(3, status);
+
+            if (wardId == null) {
+                ps.setNull(4, java.sql.Types.INTEGER);
+            } else {
+                ps.setInt(4, wardId);
+            }
+
+            if (bedId == null) {
+                ps.setNull(5, java.sql.Types.INTEGER);
+            } else {
+                ps.setInt(5, bedId);
+            }
+
+            ps.setString(6, LocalDate.now().toString());
+            ps.setString(7, notes);
+            ps.executeUpdate();
+        }
+    }
+
+    private void seedDefaultWardData() throws SQLException {
+
+        if (hasRows("wards")) {
+            return;
+        }
+
+        insertWardWithBeds("Critical Care Ward", "ICU", 1, 2);
+        insertWardWithBeds("Emergency Ward", "Emergency", 2, 3);
+        insertWardWithBeds("General Ward", "General", 3, 5);
+    }
+
+    private void insertWardWithBeds(String wardName, String wardType, int severityRank, int totalBeds) throws SQLException {
+
+        String insertWard = "insert into wards (wardName, wardType, severityRank, totalBeds) values (?, ?, ?, ?)";
+
+        try (PreparedStatement ps = conn.prepareStatement(insertWard)) {
+            ps.setString(1, wardName);
+            ps.setString(2, wardType);
+            ps.setInt(3, severityRank);
+            ps.setInt(4, totalBeds);
+            ps.executeUpdate();
+        }
+
+        int wardId = getWardIdByName(wardName);
+
+        String insertBed = "insert into beds (wardId, bedNumber, isAvailable) values (?, ?, true)";
+
+        try (PreparedStatement ps = conn.prepareStatement(insertBed)) {
+            for (int index = 1; index <= totalBeds; index++) {
+                ps.setInt(1, wardId);
+                ps.setString(2, wardType + "-" + index);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        }
+    }
+
+    private int getWardIdByName(String wardName) throws SQLException {
+
+        String sql = "select wardId from wards where wardName = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, wardName);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new SQLException("Ward not found: " + wardName);
+                }
+
+                return rs.getInt("wardId");
+            }
+        }
+    }
+
+    private boolean hasRows(String tableName) throws SQLException {
+
+        String sql = "select count(*) as total from " + tableName;
+
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            rs.next();
+            return rs.getInt("total") > 0;
+        }
+    }
+
+    private boolean isConsultOnlySeverity(String severity) {
+
+        return severity.contains("low") || severity.contains("mild") || severity.contains("minor");
+    }
+
+    private String resolveWardType(String severity) {
+
+        if (severity.contains("critical")) {
+            return "ICU";
+        }
+
+        if (severity.contains("high") || severity.contains("severe")) {
+            return "Emergency";
+        }
+
+        return "General";
+    }
+
+    private String normalizeSeverity(String severity) {
+
+        return severity == null ? "" : severity.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private int readInt(String prompt) {
+
+        while (true) {
+            System.out.println(prompt);
+            String value = sc.nextLine().trim();
+
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException ex) {
+                System.out.println("Enter a valid number");
+            }
+        }
+    }
+
+    private String readText(String prompt) {
+
+        while (true) {
+            System.out.println(prompt);
+            String value = sc.nextLine().trim();
+
+            if (!value.isEmpty()) {
+                return value;
+            }
+
+            System.out.println("Value cannot be empty");
+        }
+    }
+
+    private String valueOrDefault(String value, String defaultValue) {
+
+        return value == null || value.isBlank() ? defaultValue : value;
+    }
+
+    @Override
+    public void close() throws SQLException {
+
+        sc.close();
         conn.close();
-
-        System.out.println("Connection Closed");
+        System.out.println("Connection closed");
     }
 }
 
@@ -439,24 +771,10 @@ public class HMS {
 
     public static void main(String[] args) {
 
-        try {
-
-            Hospital hospital = new Hospital();
-
-            hospital.addPatient();
-            hospital.viewPatients();
-
-            hospital.addDoctor();
-            hospital.viewDoctors();
-
-            hospital.bookAppointment();
-            hospital.viewAppointments();
-
-            hospital.closeConnection();
-
+        try (Hospital hospital = new Hospital()) {
+            hospital.run();
         } catch (Exception e) {
-
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
     }
 }

@@ -3,9 +3,16 @@ package com.example.demo.controller;
 import com.example.demo.dto.HospitalCountsResponse;
 import com.example.demo.dto.HospitalStatusResponse;
 import com.example.demo.service.HospitalService;
+import com.example.demo.dto.WardDto;
+import com.example.demo.dto.BedDto;
+import com.example.demo.dto.AdmissionDto;
+import com.example.demo.dto.AdmissionRequest;
+import java.util.List;
 import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -65,5 +72,25 @@ public class HospitalController {
     @GetMapping("/counts/{entity}")
     public Map<String, Long> countByEntity(@PathVariable String entity) {
         return Map.of(entity, hospitalService.getCountForEntity(entity));
+    }
+
+    @GetMapping("/wards")
+    public List<WardDto> wards() {
+        return hospitalService.getWards();
+    }
+
+    @GetMapping("/beds")
+    public List<BedDto> beds() {
+        return hospitalService.getBeds();
+    }
+
+    @GetMapping("/admissions")
+    public List<AdmissionDto> admissions() {
+        return hospitalService.getAdmissions();
+    }
+
+    @PostMapping("/admit")
+    public AdmissionDto admit(@RequestBody AdmissionRequest req) {
+        return hospitalService.processAdmission(req.patientId, req.severity, req.notes);
     }
 }
