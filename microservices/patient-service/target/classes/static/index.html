@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Service Tester</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d8dee9;
+      --brand: #2563eb;
+      --brand-dark: #1d4ed8;
+      --ok: #027a48;
+      --err: #b42318;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      background: linear-gradient(135deg, #eef4ff, #f7fbff 42%, #eefaf5);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .header,
+    .panel,
+    .output {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .header {
+      grid-column: 1 / -1;
+      padding: 18px;
+    }
+
+    .header h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+    }
+
+    .header p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .panel {
+      padding: 16px;
+    }
+
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      background: var(--brand);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--brand-dark);
+    }
+
+    button.secondary {
+      background: #334155;
+    }
+
+    button.ghost {
+      background: #0f766e;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .ok { color: var(--ok); }
+    .err { color: var(--err); }
+
+    .output {
+      grid-column: 1 / -1;
+      padding: 16px;
+    }
+
+    pre {
+      margin: 0;
+      min-height: 220px;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 12px;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="header">
+      <h1>Patient Service Tester</h1>
+      <p>Use this page to test the patient-service endpoints. Paste a Bearer token for protected routes, then create or list patients, doctors, appointments, admissions, wards, and beds.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Service Access</h2>
+      <label for="authServiceUrl">Auth Service URL</label>
+      <input id="authServiceUrl" placeholder="http://localhost:8085" />
+      <label for="authUser">Auth Username</label>
+      <input id="authUser" placeholder="john" />
+      <label for="authPass">Auth Password</label>
+      <input id="authPass" type="password" placeholder="pass123" />
+      <label for="authRole">Auth Role</label>
+      <select id="authRole">
+        <option>PATIENT</option>
+        <option>DOCTOR</option>
+        <option>ADMIN</option>
+      </select>
+      <div class="row">
+        <button id="registerBtn" class="secondary">Register</button>
+        <button id="loginBtn">Login</button>
+      </div>
+      <label for="token">Bearer Token</label>
+      <input id="token" placeholder="eyJhbGciOi..." />
+      <div class="row">
+        <button id="healthBtn">Health</button>
+        <button id="infoBtn" class="secondary">Info</button>
+        <button id="meBtn" class="ghost">Me</button>
+        <button id="clearTokenBtn" class="secondary">Clear Token</button>
+      </div>
+      <div id="serviceStatus" class="status"></div>
+      <p class="hint">Use Register/Login to auto-generate and store a JWT, then call protected patient APIs.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Add Patient</h2>
+      <label for="patientId">Patient Id</label>
+      <input id="patientId" type="number" placeholder="1" />
+      <label for="patientName">Name</label>
+      <input id="patientName" placeholder="John Doe" />
+      <label for="patientAge">Age</label>
+      <input id="patientAge" type="number" placeholder="30" />
+      <label for="patientDisease">Disease</label>
+      <input id="patientDisease" placeholder="Fever" />
+      <div class="row">
+        <button id="addPatientBtn">Create Patient</button>
+        <button id="listPatientsBtn" class="secondary">List Patients</button>
+      </div>
+      <div id="patientStatus" class="status"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Add Doctor</h2>
+      <label for="doctorId">Doctor Id</label>
+      <input id="doctorId" type="number" placeholder="1" />
+      <label for="doctorName">Name</label>
+      <input id="doctorName" placeholder="Dr. Smith" />
+      <label for="doctorSpec">Specialization</label>
+      <input id="doctorSpec" placeholder="Cardiology" />
+      <div class="row">
+        <button id="addDoctorBtn">Create Doctor</button>
+        <button id="listDoctorsBtn" class="secondary">List Doctors</button>
+      </div>
+      <div id="doctorStatus" class="status"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Book Appointment</h2>
+      <label for="appointmentId">Appointment Id</label>
+      <input id="appointmentId" type="number" placeholder="1" />
+      <label for="appointmentPatientId">Patient Id</label>
+      <input id="appointmentPatientId" type="number" placeholder="1" />
+      <label for="appointmentDoctorId">Doctor Id</label>
+      <input id="appointmentDoctorId" type="number" placeholder="1" />
+      <label for="appointmentDate">Appointment Date</label>
+      <input id="appointmentDate" placeholder="2026-05-26T10:00:00" />
+      <div class="row">
+        <button id="addAppointmentBtn">Create Appointment</button>
+        <button id="listAppointmentsBtn" class="secondary">List Appointments</button>
+      </div>
+      <div id="appointmentStatus" class="status"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Admit Patient</h2>
+      <label for="admissionPatientId">Patient Id</label>
+      <input id="admissionPatientId" type="number" placeholder="1" />
+      <label for="admissionSeverity">Severity</label>
+      <select id="admissionSeverity">
+        <option>LOW</option>
+        <option>MEDIUM</option>
+        <option>HIGH</option>
+        <option>CRITICAL</option>
+      </select>
+      <label for="admissionNotes">Notes</label>
+      <textarea id="admissionNotes" placeholder="Needs observation"></textarea>
+      <div class="row">
+        <button id="addAdmissionBtn">Create Admission</button>
+        <button id="listAdmissionsBtn" class="secondary">List Admissions</button>
+      </div>
+      <div id="admissionStatus" class="status"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Reference Data</h2>
+      <div class="row">
+        <button id="listWardsBtn">List Wards</button>
+        <button id="listBedsBtn" class="secondary">List Beds</button>
+      </div>
+      <div class="hint">Wards and beds are read-only in this tester.</div>
+    </section>
+
+    <section class="output">
+      <h2 style="margin:0 0 12px; font-size:18px;">API Response</h2>
+      <pre id="output">Ready</pre>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "patientServiceTesterState";
+
+    const output = document.getElementById("output");
+
+    const stateInputs = [
+      "authServiceUrl",
+      "authUser",
+      "authPass",
+      "authRole",
+      "token",
+      "patientId",
+      "patientName",
+      "patientAge",
+      "patientDisease",
+      "doctorId",
+      "doctorName",
+      "doctorSpec",
+      "appointmentId",
+      "appointmentPatientId",
+      "appointmentDoctorId",
+      "appointmentDate",
+      "admissionPatientId",
+      "admissionSeverity",
+      "admissionNotes"
+    ];
+
+    function getEl(id) {
+      return document.getElementById(id);
+    }
+
+    function loadState() {
+      let parsed = {};
+      try {
+        parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      } catch {
+        parsed = {};
+      }
+
+      getEl("authServiceUrl").value = parsed.authServiceUrl || "http://localhost:8085";
+
+      stateInputs.forEach((id) => {
+        if (id === "authServiceUrl") {
+          return;
+        }
+        if (typeof parsed[id] !== "undefined") {
+          getEl(id).value = parsed[id];
+        }
+      });
+
+      if (parsed.lastResponse) {
+        output.textContent = parsed.lastResponse;
+      }
+    }
+
+    function saveState() {
+      const nextState = {};
+      stateInputs.forEach((id) => {
+        nextState[id] = getEl(id).value;
+      });
+      nextState.lastResponse = output.textContent;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+    }
+
+    function showJson(value) {
+      output.textContent = JSON.stringify(value, null, 2);
+      saveState();
+    }
+
+    function setStatus(id, message, ok) {
+      const el = document.getElementById(id);
+      el.className = "status " + (ok ? "ok" : "err");
+      el.textContent = message;
+    }
+
+    function authHeaders() {
+      const token = getEl("token").value.trim();
+      return token ? { Authorization: "Bearer " + token } : {};
+    }
+
+    function buildAuthUrl(path) {
+      const base = getEl("authServiceUrl").value.trim().replace(/\/$/, "");
+      return base + path;
+    }
+
+    async function request(url, options = {}) {
+      try {
+        const response = await fetch(url, options);
+        let body;
+        try {
+          body = await response.json();
+        } catch {
+          body = { message: "No JSON body", status: response.status };
+        }
+        showJson({ httpStatus: response.status, body });
+        return { response, body };
+      } catch (error) {
+        const body = {
+          error: "Unable to reach service",
+          details: error && error.message ? error.message : "Network error"
+        };
+        showJson({ httpStatus: 0, body });
+        return { response: { ok: false, status: 0 }, body };
+      }
+    }
+
+    async function authPost(path, payload, statusId, successMessage) {
+      const { response, body } = await request(buildAuthUrl(path), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      setStatus(statusId, response.ok ? successMessage : (body.message || body.error || "Auth request failed"), response.ok);
+      return { response, body };
+    }
+
+    async function getJson(url, statusId) {
+      const { response, body } = await request(url, {
+        method: "GET",
+        headers: authHeaders()
+      });
+      setStatus(statusId, response.ok ? "Success" : (body.message || body.error || "Request failed"), response.ok);
+      return { response, body };
+    }
+
+    async function postJson(url, payload, statusId) {
+      const { response, body } = await request(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders()
+        },
+        body: JSON.stringify(payload)
+      });
+      setStatus(statusId, response.ok ? "Saved" : (body.message || body.error || "Request failed"), response.ok);
+      return { response, body };
+    }
+
+    async function registerUser() {
+      const username = getEl("authUser").value.trim();
+      const password = getEl("authPass").value;
+      const role = getEl("authRole").value;
+
+      if (!username || !password) {
+        setStatus("serviceStatus", "Username and password are required", false);
+        return;
+      }
+
+      await authPost("/api/auth/register", { username, password, role }, "serviceStatus", "User registered");
+      saveState();
+    }
+
+    async function loginUser() {
+      const username = getEl("authUser").value.trim();
+      const password = getEl("authPass").value;
+
+      if (!username || !password) {
+        setStatus("serviceStatus", "Username and password are required", false);
+        return;
+      }
+
+      const { response, body } = await authPost("/api/auth/login", { username, password }, "serviceStatus", "Login success");
+      if (response.ok && body.token) {
+        getEl("token").value = body.token;
+        saveState();
+      }
+    }
+
+    function clearToken() {
+      getEl("token").value = "";
+      setStatus("serviceStatus", "Token cleared", true);
+      saveState();
+    }
+
+    stateInputs.forEach((id) => {
+      getEl(id).addEventListener("input", saveState);
+      getEl(id).addEventListener("change", saveState);
+    });
+
+    loadState();
+
+    document.getElementById("registerBtn").addEventListener("click", registerUser);
+    document.getElementById("loginBtn").addEventListener("click", loginUser);
+    document.getElementById("clearTokenBtn").addEventListener("click", clearToken);
+
+    document.getElementById("healthBtn").addEventListener("click", () => getJson("/api/patients/health", "serviceStatus"));
+    document.getElementById("infoBtn").addEventListener("click", () => getJson("/api/patients/info", "serviceStatus"));
+    document.getElementById("meBtn").addEventListener("click", () => getJson("/api/patients/me", "serviceStatus"));
+
+    document.getElementById("addPatientBtn").addEventListener("click", () => {
+      postJson("/api/patients/patients", {
+        patientId: Number(document.getElementById("patientId").value),
+        name: document.getElementById("patientName").value.trim(),
+        age: Number(document.getElementById("patientAge").value),
+        disease: document.getElementById("patientDisease").value.trim()
+      }, "patientStatus");
+    });
+
+    document.getElementById("listPatientsBtn").addEventListener("click", () => getJson("/api/patients/patients", "patientStatus"));
+
+    document.getElementById("addDoctorBtn").addEventListener("click", () => {
+      postJson("/api/patients/doctors", {
+        doctorId: Number(document.getElementById("doctorId").value),
+        name: document.getElementById("doctorName").value.trim(),
+        specialization: document.getElementById("doctorSpec").value.trim()
+      }, "doctorStatus");
+    });
+
+    document.getElementById("listDoctorsBtn").addEventListener("click", () => getJson("/api/patients/doctors", "doctorStatus"));
+
+    document.getElementById("addAppointmentBtn").addEventListener("click", () => {
+      postJson("/api/patients/appointments", {
+        appointmentId: Number(document.getElementById("appointmentId").value),
+        patientId: Number(document.getElementById("appointmentPatientId").value),
+        doctorId: Number(document.getElementById("appointmentDoctorId").value),
+        appointmentDate: document.getElementById("appointmentDate").value.trim()
+      }, "appointmentStatus");
+    });
+
+    document.getElementById("listAppointmentsBtn").addEventListener("click", () => getJson("/api/patients/appointments", "appointmentStatus"));
+
+    document.getElementById("addAdmissionBtn").addEventListener("click", () => {
+      postJson("/api/patients/admissions", {
+        patientId: Number(document.getElementById("admissionPatientId").value),
+        severity: document.getElementById("admissionSeverity").value,
+        notes: document.getElementById("admissionNotes").value.trim()
+      }, "admissionStatus");
+    });
+
+    document.getElementById("listAdmissionsBtn").addEventListener("click", () => getJson("/api/patients/admissions", "admissionStatus"));
+    document.getElementById("listWardsBtn").addEventListener("click", () => getJson("/api/patients/wards", "serviceStatus"));
+    document.getElementById("listBedsBtn").addEventListener("click", () => getJson("/api/patients/beds", "serviceStatus"));
+  </script>
+</body>
+</html>

@@ -31,8 +31,10 @@ The Auth Service handles:
 
 The service automatically creates the `auth` database and `users` table on startup.
 
-If you want to create the table manually, use the SQL file at:
-[src/main/resources/schema.sql](/media/rishiraj/New%20Volume/CRT_Phase_2/microservices/auth-service/src/main/resources/schema.sql)
+Use either of these SQL files to initialize the database manually:
+
+- [src/main/resources/schema.sql](/media/rishiraj/New%20Volume/CRT_Phase_2/microservices/auth-service/src/main/resources/schema.sql)
+- [sql/init_authdb.sql](/media/rishiraj/New%20Volume/CRT_Phase_2/microservices/auth-service/sql/init_authdb.sql)
 
 **users table structure:**
 ```sql
