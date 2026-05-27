@@ -1,0 +1,24 @@
+{
+  "name": "hospital-management-frontend",
+  "description": "Hospital Management System - Modern Web Frontend",
+  "version": "1.0.0",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'Static site - no build needed'",
+    "start": "npx http-server -p 3000",
+    "dev": "npx http-server -p 3000 -c-1"
+  },
+  "keywords": [
+    "hospital",
+    "management",
+    "healthcare",
+    "patients",
+    "doctors",
+    "appointments"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
