@@ -117,6 +117,8 @@ JWT_EXPIRATION="86400000" \
 DB_USERNAME="root" \
 DB_PASSWORD="" \
 DB_URL="jdbc:mysql://localhost:3306/auth?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
+SPRING_DATASOURCE_DRIVER_CLASS_NAME="com.mysql.cj.jdbc.Driver" \
+SPRING_JPA_DIALECT="org.hibernate.dialect.MySQL8Dialect" \
 java -jar target/auth-service-0.0.1-SNAPSHOT.jar 2>&1 | tee "$PROJECT_ROOT/logs/auth-service.log" &
 AUTH_PID=$!
 echo "✓ Auth Service started with PID: $AUTH_PID"
@@ -135,6 +137,8 @@ cd "$PROJECT_ROOT/microservices/patient-service"
 DB_USERNAME="root" \
 DB_PASSWORD="" \
 DB_URL="jdbc:mysql://localhost:3306/patientdb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
+SPRING_DATASOURCE_DRIVER_CLASS_NAME="com.mysql.cj.jdbc.Driver" \
+SPRING_JPA_DIALECT="org.hibernate.dialect.MySQL8Dialect" \
 java -jar target/patient-service-0.0.1-SNAPSHOT.jar 2>&1 | tee "$PROJECT_ROOT/logs/patient-service.log" &
 PATIENT_PID=$!
 echo "✓ Patient Service started with PID: $PATIENT_PID"
